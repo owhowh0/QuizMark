@@ -1,0 +1,13 @@
+QUIZ: World Landmarks
+QUESTION(points=5): Name this structure
+IMAGE: "assets/eiffel.jpg"
+A: Eiffel Tower *
+B: Statue of Liberty
+C: Colosseum
+QUESTION: Which image represents Japan?
+A:
+IMAGE: "flags/china.png"
+B:
+IMAGE: "flags/japan.png" *
+C:
+IMAGE: "flags/korea.png"
