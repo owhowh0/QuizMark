@@ -1,3 +1,26 @@
+# QuizMark — Lightweight Quiz DSL
+
+QuizMark is a handwritten parser and CLI for creating, validating, styling, and exporting quizzes in a simple `.qm` format. It is designed to be easy to embed in web pages and to export Moodle-compatible XML.
+
+## Quick start
+
+```bash
+python -m quizmark validate examples/geography.qm
+python -m quizmark export examples/geography.qm --format html --out quiz.html
+python -m quizmark export examples/geography.qm --format web --out web_bundle
+```
+
+## Docs
+
+See the docs in `docs/`:
+
+- `docs/dsl.md`
+- `docs/cli.md`
+- `docs/api.md`
+- `docs/moodle.md`
+
+---
+
 # Quiz Parser — ANTLR4 Project
 
 A parser for a custom `.qm` file format, built with [ANTLR4](https://www.antlr.org/) and Python.

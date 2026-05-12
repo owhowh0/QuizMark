@@ -1,0 +1,36 @@
+QUIZ: Geography Test
+
+IMAGE: "antlr4_parse_tree1.png"
+AUDIO: "audio/intro.mp3"
+ATTACH: "files/map-handout.pdf"
+MATH: "x^2 + y^2 = z^2"
+
+THEME {
+    background = dark
+    question [font=Arial, size=18]
+    correct [color=green]
+}
+
+TIME_LIMIT: 30
+PASS_MARK: 70%
+SHUFFLE: true
+
+QUESTION (points=2): Which planet is shown?
+IMAGE: "antlr4_parse_tree2.png"
+VIDEO: "video/space-tour.mp4"
+
+A: Earth
+B: Mars *
+C: Venus
+
+QUESTION: Which flag belongs to Italy?
+
+A:
+IMAGE: "antlr4_parse_tree1.png"
+
+B:
+IMAGE: "antlr4_parse_tree2.png" *
+MATH: "a^2 + b^2 = c^2"
+
+C:
+IMAGE: "antlr4_parse_tree3.png"
