@@ -202,7 +202,7 @@ python Front/Interface.py
 
 ## Notes
 
-- The parser is a custom handwritten implementation defined by the grammar in `Quiz.g4`.
+- The parser is a custom handwritten implementation
 - The grammar file should not be edited without updating the parser accordingly.
 
 ## License
