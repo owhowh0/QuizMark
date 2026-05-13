@@ -1,13 +1,16 @@
 QUIZ: Science 101
+
 THEME
 {
-    primary_color = "blue"
-    question[font="Verdana", size=14]
-    correct[color="green", weight="bold"]
+    accent = "blue"
+    question [font="Verdana", size=14]
+    correct [color="green", weight="bold"]
 }
+
 TIME_LIMIT: 60
 DIFFICULTY: Easy
 CATEGORY: Biology
+
 QUESTION: Which of these is a mammal?
 A: Shark
 B: Whale *
