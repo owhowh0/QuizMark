@@ -4,7 +4,7 @@ from QuizLexer import QuizLexer
 from QuizParser import QuizParser
 from QuizVisitorImpl import QuizVisitorImpl
 from models import QuizData, ThemeData, QuestionData, AnswerData
-
+from pathlib import Path
 
 def print_quiz(quiz: QuizData) -> None:
     print(f"QUIZ: {quiz.title}")
@@ -53,7 +53,14 @@ def main(argv):
         print("Usage: python main.py <qm_file> [--tree]", file=sys.stderr)
         sys.exit(1)
 
-    input_stream = FileStream(file_args[0], encoding="utf-8")
+    path = Path(file_args[0])  # ← новое
+    if not path.exists():  # ← новое
+        print(f"Error: '{path}' not found.", file=sys.stderr)
+        sys.exit(1)
+    if path.suffix != ".qm":  # ← новое
+        print(f"Warning: expected .qm file, got '{path.suffix}'.", file=sys.stderr)
+
+    input_stream = FileStream(str(path), encoding="utf-8")
     lexer = QuizLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = QuizParser(stream)
