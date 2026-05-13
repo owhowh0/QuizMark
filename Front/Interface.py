@@ -1,7 +1,7 @@
 """
 QuizMark GUI — PyQt6 editor, validator, media-aware previewer, and exporter for .qm files.
 
-Final GUI patch: local image preview fixes, stronger Validate/Lint, safer toolbar actions, and economic classroom design.
+Final checked GUI patch: backend-connected Validate/Lint, clearer toolbar buttons, image preview fixes, and 3 visual themes.
 
 Put this file either in the QuizMark project root or in a sibling/front-end folder.
 It searches upward for the quizmark package, so PyCharm can run it from Front/Interface.py.
@@ -47,6 +47,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QPlainTextEdit,
     QPushButton,
+    QSlider,
     QSplitter,
     QTabWidget,
     QTextEdit,
@@ -103,7 +104,7 @@ except ImportError as exc:
 # ══════════════════════════════════════════════════════════════════════════
 #  Colour palette
 # ══════════════════════════════════════════════════════════════════════════
-# Professional/economic palette: dark market-blue, economy green, and muted gold.
+# Professional palette: dark market-blue, success green, and muted gold.
 DARK = "#0f172a"       # editor background
 SURFACE = "#162033"    # secondary surfaces
 PANEL = "#111827"      # menus / docks / toolbar
@@ -111,7 +112,7 @@ BORDER = "#2f3b52"     # separators
 FG = "#eef2e6"         # main text
 FG_DIM = "#94a3b8"     # secondary text
 ACCENT = "#d6a43a"     # gold accent
-GREEN = "#70b77e"      # success / economy green
+GREEN = "#70b77e"      # success green
 RED = "#ef8181"        # errors
 YELLOW = "#f4c95d"     # warnings
 PURPLE = "#7cc4b2"     # hover / alternate accent
@@ -842,20 +843,42 @@ class ExportDialog(QDialog):
         self.setMinimumWidth(430)
         self.setStyleSheet(
             f"""
-            QDialog {{ background:{SURFACE}; color:{FG}; }}
-            QLabel  {{ color:{FG}; }}
+            QDialog {{ background:{SURFACE}; color:#ffffff; }}
+
+            QLabel {{
+                color:#ffffff;
+            }}
+
             QComboBox, QLineEdit {{
-                background:{DARK};color:{FG};border:1px solid {BORDER};
-                padding:4px 8px;border-radius:4px;
+                background:{DARK};
+                color:#ffffff;
+                border:1px solid {BORDER};
+                padding:4px 8px;
+                border-radius:4px;
             }}
+
+            QComboBox QAbstractItemView {{
+                background:{DARK};
+                color:#ffffff;
+                selection-background-color:{ACCENT};
+                selection-color:#ffffff;
+                border:1px solid {BORDER};
+            }}
+
             QPushButton {{
-                background:{ACCENT};color:{DARK};border:none;
-                padding:6px 16px;border-radius:4px;font-weight:bold;
+                background:{ACCENT};
+                color:{DARK};
+                border:none;
+                padding:6px 16px;
+                border-radius:4px;
+                font-weight:bold;
             }}
-            QPushButton:hover {{ background:{PURPLE}; }}
+
+            QPushButton:hover {{
+                background:{PURPLE};
+            }}
             """
         )
-
         form = QFormLayout(self)
         self.fmt = QComboBox()
         self.fmt.addItems(self.FORMATS)
@@ -921,7 +944,13 @@ B: Second option *
 C: Third option
 """
 
-_ECONOMIC_THEME_SNIPPET = """THEME {
+THEME_PRESETS: list[dict[str, str]] = [
+    {
+        "name": "Market Green",
+        "description": "Economics/business style: warm paper background, deep green accent, and clean readable answers.",
+        "sample": """<div style='background:#f7f4ea;color:#1f2d2a;border:1px solid #d8cfb7;border-radius:10px;padding:12px;font-family:Arial'>
+<b style='color:#2e7d32'>Market Green</b><br>Question title<br><span style='color:#1b5e20'>✓ Correct answer</span></div>""",
+        "snippet": """THEME {
     background = "#f7f4ea"
     foreground = "#1f2d2a"
     accent = "#2e7d32"
@@ -934,11 +963,53 @@ _ECONOMIC_THEME_SNIPPET = """THEME {
     correct [color="#1b5e20", weight="bold"]
     wrong [color="#8b1e1e"]
 }
-"""
+""",
+    },
+    {
+        "name": "Academic Blue",
+        "description": "Formal class/test style: calm blue background, serif headings, and strong contrast for lessons.",
+        "sample": """<div style='background:#eef5ff;color:#172554;border:1px solid #bdd7ff;border-radius:10px;padding:12px;font-family:Georgia'>
+<b style='color:#1d4ed8'>Academic Blue</b><br>Question title<br><span style='color:#047857'>✓ Correct answer</span></div>""",
+        "snippet": """THEME {
+    background = "#eef5ff"
+    foreground = "#172554"
+    accent = "#1d4ed8"
+    font = "Georgia"
+    spacing = "2rem"
+    radius = "12px"
 
-_ECONOMIC_TEMPLATE = """QUIZ: {title}
+    question [font="Georgia", size=17, color="#172554", weight="bold"]
+    answer [font="Georgia", size=14, color="#1e3a8a"]
+    correct [color="#047857", weight="bold"]
+    wrong [color="#be123c"]
+}
+""",
+    },
+    {
+        "name": "Projector Dark",
+        "description": "High-contrast dark style: good for projectors, presentations, and users who prefer dark screens.",
+        "sample": """<div style='background:#0b1020;color:#f8fafc;border:1px solid #334155;border-radius:10px;padding:12px;font-family:Verdana'>
+<b style='color:#f59e0b'>Projector Dark</b><br>Question title<br><span style='color:#86efac'>✓ Correct answer</span></div>""",
+        "snippet": """THEME {
+    background = "#0b1020"
+    foreground = "#f8fafc"
+    accent = "#f59e0b"
+    font = "Verdana"
+    spacing = "2rem"
+    radius = "6px"
 
-# Economic classroom theme: green/gold, clear contrast, low visual noise.
+    question [font="Verdana", size=17, color="#f8fafc", weight="bold"]
+    answer [font="Verdana", size=14, color="#dbeafe"]
+    correct [color="#86efac", weight="bold"]
+    wrong [color="#fca5a5"]
+}
+""",
+    },
+]
+
+_THEMED_TEMPLATE = """QUIZ: {title}
+
+# Theme: {theme_name}
 {theme}
 TIME_LIMIT: 60
 PASS_MARK: 70%
@@ -959,46 +1030,179 @@ C: Third choice
 
 
 
-class NewFileDialog(QDialog):
-    def __init__(self, parent: QWidget | None = None):
+class ThemePresetDialog(QDialog):
+    """Slider-based theme chooser used by the Theme toolbar/menu action."""
+
+    def __init__(self, parent: QWidget | None = None, initial_index: int = 0):
         super().__init__(parent)
-        self.setWindowTitle("New QuizMark File")
-        self.setMinimumWidth(360)
+        self.setWindowTitle("Choose Theme")
+        self.setMinimumWidth(560)
         self.setStyleSheet(
             f"""
             QDialog {{ background:{SURFACE};color:{FG}; }}
             QLabel  {{ color:{FG}; }}
-            QLineEdit, QComboBox {{
+            QPlainTextEdit {{
                 background:{DARK};color:{FG};border:1px solid {BORDER};
-                padding:4px 8px;border-radius:4px;
+                padding:8px;border-radius:6px;
+                font-family:Consolas,'Courier New',monospace;font-size:11px;
             }}
-            QComboBox QAbstractItemView {{
-                background:{DARK};color:{FG};border:1px solid {BORDER};
+            QSlider::groove:horizontal {{
+                height:6px;background:{BORDER};border-radius:3px;
+            }}
+            QSlider::handle:horizontal {{
+                background:{ACCENT};border:1px solid {YELLOW};
+                width:18px;margin:-6px 0;border-radius:9px;
             }}
             QPushButton {{
                 background:{ACCENT};color:{DARK};border:none;
                 padding:6px 16px;border-radius:4px;font-weight:bold;
             }}
+            QPushButton:hover {{ background:{PURPLE}; }}
+            """
+        )
+
+        layout = QVBoxLayout(self)
+        intro = QLabel("Move the slider to choose one of 3 visual themes, then insert it into the current quiz.")
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+
+        self.name_label = QLabel()
+        self.name_label.setStyleSheet(f"color:{ACCENT};font-size:15px;font-weight:bold;")
+        layout.addWidget(self.name_label)
+
+        self.description_label = QLabel()
+        self.description_label.setWordWrap(True)
+        self.description_label.setStyleSheet(f"color:{FG_DIM};")
+        layout.addWidget(self.description_label)
+
+        self.sample_label = QLabel()
+        self.sample_label.setTextFormat(Qt.TextFormat.RichText)
+        self.sample_label.setMinimumHeight(90)
+        self.sample_label.setStyleSheet(f"background:{DARK};border:1px solid {BORDER};border-radius:8px;padding:8px;")
+        layout.addWidget(self.sample_label)
+
+        self.slider = QSlider(Qt.Orientation.Horizontal)
+        self.slider.setMinimum(0)
+        self.slider.setMaximum(len(THEME_PRESETS) - 1)
+        self.slider.setSingleStep(1)
+        self.slider.setPageStep(1)
+        self.slider.setTickInterval(1)
+        self.slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.slider.setValue(max(0, min(initial_index, len(THEME_PRESETS) - 1)))
+        self.slider.valueChanged.connect(self._update_preview)
+        layout.addWidget(self.slider)
+
+        tick_row = QHBoxLayout()
+        for index, preset in enumerate(THEME_PRESETS, start=1):
+            label = QLabel(f"{index}. {preset['name']}")
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            label.setStyleSheet(f"color:{FG_DIM};font-size:10px;")
+            tick_row.addWidget(label)
+        layout.addLayout(tick_row)
+
+        self.preview = QPlainTextEdit()
+        self.preview.setReadOnly(True)
+        self.preview.setMinimumHeight(250)
+        layout.addWidget(self.preview)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        ok_button = buttons.button(QDialogButtonBox.StandardButton.Ok)
+        if ok_button:
+            ok_button.setText("Insert Theme")
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+        self._update_preview(self.slider.value())
+
+    def _update_preview(self, index: int) -> None:
+        preset = THEME_PRESETS[index]
+        self.name_label.setText(f"{index + 1}. {preset['name']}")
+        self.description_label.setText(preset["description"])
+        self.sample_label.setText(preset.get("sample", ""))
+        self.preview.setPlainText(preset["snippet"].rstrip())
+
+    def selected_preset(self) -> dict[str, str]:
+        return THEME_PRESETS[self.slider.value()]
+
+
+class NewFileDialog(QDialog):
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setWindowTitle("New QuizMark File")
+        self.setMinimumWidth(440)
+        self.setStyleSheet(
+            f"""
+            QDialog {{ background:{SURFACE};color:{FG}; }}
+            QLabel  {{ color:{FG}; }}
+            QLineEdit {{
+                background:{DARK};color:{FG};border:1px solid {BORDER};
+                padding:4px 8px;border-radius:4px;
+            }}
+            QSlider::groove:horizontal {{
+                height:6px;background:{BORDER};border-radius:3px;
+            }}
+            QSlider::handle:horizontal {{
+                background:{ACCENT};border:1px solid {YELLOW};
+                width:18px;margin:-6px 0;border-radius:9px;
+            }}
+            QPushButton {{
+                background:{ACCENT};color:{DARK};border:none;
+                padding:6px 16px;border-radius:4px;font-weight:bold;
+            }}
+            QPushButton:hover {{ background:{PURPLE}; }}
             """
         )
         form = QFormLayout(self)
         self.title = QLineEdit("My Quiz")
         self.first_q = QLineEdit("What is opportunity cost?")
-        self.preset = QComboBox()
-        self.preset.addItems(["Simple quiz", "Economic theme quiz"])
+
+        self.theme_label = QLabel()
+        self.theme_label.setStyleSheet(f"color:{ACCENT};font-weight:bold;")
+        self.theme_slider = QSlider(Qt.Orientation.Horizontal)
+        self.theme_slider.setMinimum(0)
+        self.theme_slider.setMaximum(len(THEME_PRESETS))
+        self.theme_slider.setSingleStep(1)
+        self.theme_slider.setPageStep(1)
+        self.theme_slider.setTickInterval(1)
+        self.theme_slider.setTickPosition(QSlider.TickPosition.TicksBelow)
+        self.theme_slider.valueChanged.connect(self._update_theme_label)
+
         form.addRow("Quiz Title:", self.title)
         form.addRow("First Question:", self.first_q)
-        form.addRow("Template:", self.preset)
+        form.addRow("Theme:", self.theme_label)
+        form.addRow("", self.theme_slider)
+
+        hint = QLabel("0 = no theme. Slide to 1–3 to include one of the built-in visual themes.")
+        hint.setWordWrap(True)
+        hint.setStyleSheet(f"color:{FG_DIM};font-size:11px;")
+        form.addRow("", hint)
+
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         form.addRow(buttons)
+        self._update_theme_label(self.theme_slider.value())
+
+    def _update_theme_label(self, value: int) -> None:
+        if value <= 0:
+            self.theme_label.setText("No theme")
+            return
+        preset = THEME_PRESETS[value - 1]
+        self.theme_label.setText(f"{value}. {preset['name']}")
 
     def template(self) -> str:
         title = self.title.text().strip() or "My Quiz"
         question = self.first_q.text().strip() or "Sample question?"
-        if self.preset.currentIndex() == 1:
-            return _ECONOMIC_TEMPLATE.format(title=title, question=question, theme=_ECONOMIC_THEME_SNIPPET)
+        theme_index = self.theme_slider.value() - 1
+        if theme_index >= 0:
+            preset = THEME_PRESETS[theme_index]
+            return _THEMED_TEMPLATE.format(
+                title=title,
+                question=question,
+                theme_name=preset["name"],
+                theme=preset["snippet"],
+            )
         return _BASIC_TEMPLATE.format(title=title, question=question)
 
 
@@ -1008,7 +1212,7 @@ class NewFileDialog(QDialog):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("QuizMark Studio — Economics Edition")
+        self.setWindowTitle("QuizMark Studio")
         self.resize(1280, 800)
         self._apply_dark_theme()
         self._build_ui()
@@ -1105,6 +1309,7 @@ class MainWindow(QMainWindow):
         self._problems = ProblemsPanel()
         self._problems.line_requested.connect(self._goto_line)
         dock_probs = QDockWidget("PROBLEMS", self)
+        self._dock_problems = dock_probs
         dock_probs.setWidget(self._problems)
         dock_probs.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetMovable
@@ -1124,6 +1329,7 @@ class MainWindow(QMainWindow):
             """
         )
         dock_out = QDockWidget("OUTPUT", self)
+        self._dock_output = dock_out
         dock_out.setWidget(self._output_view)
         dock_out.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetMovable
@@ -1167,7 +1373,7 @@ class MainWindow(QMainWindow):
         self._add_action(edit_menu, "Select &All", "Ctrl+A", lambda: self._cur_editor() and self._cur_editor().selectAll())
         edit_menu.addSeparator()
         self._add_action(edit_menu, "Insert &Image Reference…", "Ctrl+I", self._insert_image_reference)
-        self._add_action(edit_menu, "Insert &Economic Theme", "Ctrl+Alt+T", self._insert_economic_theme)
+        self._add_action(edit_menu, "Insert &Theme…", "Ctrl+Alt+T", self._insert_theme_preset)
 
         run_menu = menu_bar.addMenu("&Run")
         self._add_action(run_menu, "▶  Validate", "F5", self._validate)
@@ -1190,7 +1396,7 @@ class MainWindow(QMainWindow):
         self._add_action(help_menu, "Image/Media Help", "", self._show_media_help)
         self._add_action(help_menu, "Grammar (BNF view)", "", self._show_grammar)
         self._add_action(help_menu, "Insert Question Template", "Ctrl+T", self._insert_template)
-        self._add_action(help_menu, "Insert Economic Theme", "", self._insert_economic_theme)
+        self._add_action(help_menu, "Insert Theme…", "", self._insert_theme_preset)
 
     def _add_action(self, menu, label: str, shortcut: str, slot) -> QAction:
         action = QAction(label, self)
@@ -1207,17 +1413,19 @@ class MainWindow(QMainWindow):
         toolbar.setMovable(False)
         self.addToolBar(toolbar)
 
-        def make_button(label: str, tip: str, slot, color: str = ACCENT) -> QPushButton:
+        def make_button(label: str, tip: str, slot, color: str = ACCENT, text_color: str | None = None) -> QPushButton:
             button = QPushButton(label)
             button.setToolTip(tip)
-            button.setFixedHeight(26)
+            button.setFixedHeight(28)
+            resolved_text = text_color or (FG if color == SURFACE else DARK)
+            border_css = f"1px solid {BORDER}" if color == SURFACE else "none"
             button.setStyleSheet(
                 f"""
                 QPushButton {{
-                    background:{color};color:{DARK};border:none;
-                    padding:0 12px;border-radius:3px;font-weight:bold;font-size:11px;
+                    background:{color};color:{resolved_text};border:{border_css};
+                    padding:0 12px;border-radius:4px;font-weight:bold;font-size:11px;
                 }}
-                QPushButton:hover {{ background:{PURPLE}; }}
+                QPushButton:hover {{ background:{PURPLE}; color:{DARK}; }}
                 """
             )
             button.clicked.connect(lambda checked=False, callback=slot: callback())
@@ -1231,7 +1439,7 @@ class MainWindow(QMainWindow):
         toolbar.addWidget(make_button("▶ Lint", "Lint (F6)", self._lint, TEAL))
         toolbar.addSeparator()
         toolbar.addWidget(make_button("Image Q", "Insert an image-question template", self._insert_image_question, ACCENT))
-        toolbar.addWidget(make_button("Theme change", "Insert an economic classroom theme", self._insert_economic_theme, YELLOW))
+        toolbar.addWidget(make_button("Theme", "Choose and insert a theme", self._insert_theme_preset, YELLOW))
         toolbar.addSeparator()
         toolbar.addWidget(make_button("Export…", "Export (Ctrl+E)", self._export, PURPLE))
 
@@ -1360,6 +1568,8 @@ class MainWindow(QMainWindow):
         tab = self._cur_tab()
         if not tab:
             return
+        if hasattr(self, "_dock_output"):
+            self._dock_output.raise_()
         self._output("─── Validate ───")
         if not self._ensure_quizmark():
             return
@@ -1368,19 +1578,25 @@ class MainWindow(QMainWindow):
             quiz_data = parser.parse_text(tab.text(), source=str(tab.path or "untitled"))
             validation_messages = [str(e) for e in validate_quiz(quiz_data)]
             media_warnings = media_path_warnings(quiz_data, tab.path)
+
             tab._quiz_data = quiz_data
             tab._errors = validation_messages + media_warnings
             self._on_errors_changed(tab._errors)
 
-            if validation_messages:
-                self._output(f"  Validation failed with {len(validation_messages)} issue(s).", warn=True)
-                for error in validation_messages:
-                    self._output(f"  ✗  {error}", warn=True)
-                tab.preview.show_error("\n".join(validation_messages))
-                return
-
             question_count = len(quiz_data.questions)
             answer_count = sum(len(question.answers) for question in quiz_data.questions)
+
+            if validation_messages:
+                self._output(f"  Syntax      : PASS ✓", ok=True)
+                self._output(f"  Validation  : FAIL ✗ ({len(validation_messages)} issue(s))", warn=True)
+                for error in validation_messages:
+                    self._output(f"  ✗  {error}", warn=True)
+                for warning in media_warnings:
+                    self._output(f"  ⚠  {warning}", warn=True)
+                tab.preview.show_error("\n".join(validation_messages))
+                self._status_state.setText("Validation failed")
+                return
+
             self._output("  Syntax      : PASS ✓", ok=True)
             self._output("  Validation  : PASS ✓", ok=True)
             self._output(f"  Questions   : {question_count}")
@@ -1388,28 +1604,37 @@ class MainWindow(QMainWindow):
             if media_warnings:
                 for warning in media_warnings:
                     self._output(f"  ⚠  {warning}", warn=True)
-                self._output("  Validation passed, but media warnings need attention.", warn=True)
+                self._output("  Result      : Quiz is valid, but some media files are missing.", warn=True)
+                self._status_state.setText("Valid with media warnings")
             else:
-                self._output("  ✓  Media paths look OK.", ok=True)
-                self._output("  ✓  Ready to preview or export. Tip: use Export… for HTML, Moodle, PDF, or DOCX.", ok=True)
+                self._output("  Media       : PASS ✓", ok=True)
+                self._output("  Result      : Ready to preview or export.", ok=True)
+                self._status_state.setText("Validation passed")
             tab._refresh_preview()
         except (ParserError, ValidationError) as exc:
             message = str(exc)
             tab._quiz_data = None
             tab._errors = [message]
             self._on_errors_changed(tab._errors)
+            tab.preview.show_error(message)
+            self._output(f"  Syntax      : FAIL ✗", warn=True)
             self._output(f"  ✗  {message}", warn=True)
+            self._status_state.setText("Syntax error")
         except Exception as exc:
             message = str(exc)
             tab._quiz_data = None
             tab._errors = [message]
             self._on_errors_changed(tab._errors)
-            self._output(f"  ✗  {message}", warn=True)
+            tab.preview.show_error(message)
+            self._output(f"  ✗  Unexpected error: {message}", warn=True)
+            self._status_state.setText("Validation error")
 
     def _lint(self) -> None:
         tab = self._cur_tab()
         if not tab:
             return
+        if hasattr(self, "_dock_output"):
+            self._dock_output.raise_()
         self._output("─── Lint ───")
         if not self._ensure_quizmark():
             return
@@ -1418,6 +1643,7 @@ class MainWindow(QMainWindow):
             quiz_data = parser.parse_text(tab.text(), source=str(tab.path or "untitled"))
             validation_messages = [str(e) for e in validate_quiz(quiz_data)]
             media_warnings = media_path_warnings(quiz_data, tab.path)
+
             tab._quiz_data = quiz_data
             tab._errors = validation_messages + media_warnings
             self._on_errors_changed(tab._errors)
@@ -1425,6 +1651,10 @@ class MainWindow(QMainWindow):
             question_count = len(quiz_data.questions)
             answer_count = sum(len(question.answers) for question in quiz_data.questions)
             correct_count = sum(1 for question in quiz_data.questions for answer in question.answers if answer.correct)
+            multi_correct_count = sum(
+                1 for question in quiz_data.questions
+                if sum(1 for answer in question.answers if answer.correct) > 1
+            )
             has_theme = quiz_data.theme is not None
             has_meta = any([
                 quiz_data.metadata.time_limit is not None,
@@ -1433,12 +1663,16 @@ class MainWindow(QMainWindow):
                 bool(quiz_data.metadata.extras),
             ])
             media_refs = _collect_media_refs(quiz_data)
-            local_media_refs = [ref for ref in media_refs if ref[0] in _LOCAL_MEDIA_KINDS and not _is_external_media_reference(ref[1])]
+            local_media_refs = [
+                ref for ref in media_refs
+                if ref[0] in _LOCAL_MEDIA_KINDS and not _is_external_media_reference(ref[1])
+            ]
 
             self._output(f"  Title       : {quiz_data.title}")
             self._output(f"  Questions   : {question_count}")
             self._output(f"  Answers     : {answer_count}")
             self._output(f"  Correct     : {correct_count}")
+            self._output(f"  Multi-correct questions: {multi_correct_count}")
             self._output(f"  Media refs  : {len(media_refs)} ({len(local_media_refs)} local files)")
             self._output(f"  Missing media: {len(media_warnings)}")
             self._output(f"  Theme       : {'yes' if has_theme else 'no'}")
@@ -1452,22 +1686,31 @@ class MainWindow(QMainWindow):
 
             if not validation_messages and not media_warnings:
                 self._output("  Lint complete — OK.", ok=True)
+                self._status_state.setText("Lint OK")
             elif not validation_messages:
                 self._output("  Lint complete — validation passed, but media warnings were found.", warn=True)
+                self._status_state.setText("Lint warnings")
             else:
                 self._output("  Lint complete — fix validation errors before exporting.", warn=True)
+                self._status_state.setText("Lint failed")
+            if not validation_messages:
+                tab._refresh_preview()
         except (ParserError, ValidationError) as exc:
             message = str(exc)
             tab._quiz_data = None
             tab._errors = [message]
             self._on_errors_changed(tab._errors)
+            tab.preview.show_error(message)
             self._output(f"  ✗  {message}", warn=True)
+            self._status_state.setText("Lint syntax error")
         except Exception as exc:
             message = str(exc)
             tab._quiz_data = None
             tab._errors = [message]
             self._on_errors_changed(tab._errors)
-            self._output(f"  ✗  {message}", warn=True)
+            tab.preview.show_error(message)
+            self._output(f"  ✗  Unexpected error: {message}", warn=True)
+            self._status_state.setText("Lint error")
 
     def _preview_text_run(self) -> None:
         tab = self._cur_tab()
@@ -1614,32 +1857,47 @@ class MainWindow(QMainWindow):
         editor.setTextCursor(cursor)
         self._output("Inserted image question template. Replace images/example.jpg with your real image path.")
 
-    def _insert_economic_theme(self) -> None:
+    def _insert_theme_preset(self) -> None:
         editor = self._cur_editor()
         if not editor:
             return
+        dialog = ThemePresetDialog(self)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+
+        preset = dialog.selected_preset()
+        snippet = preset["snippet"].rstrip()
         text = editor.toPlainText()
-        if "THEME" in text.upper():
+        theme_match = re.search(r"(?ims)^\s*THEME\s*\{.*?^\s*\}\s*\n?", text)
+
+        cursor = editor.textCursor()
+        if theme_match:
             response = QMessageBox.question(
                 self,
                 "Theme already exists",
-                "This file already contains a THEME block. Insert the economic theme anyway?",
+                "This file already contains a THEME block. Replace it with the selected preset?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
             if response != QMessageBox.StandardButton.Yes:
                 return
-        cursor = editor.textCursor()
+            cursor.setPosition(theme_match.start())
+            cursor.setPosition(theme_match.end(), QTextCursor.MoveMode.KeepAnchor)
+            cursor.insertText(snippet + "\n\n")
+            editor.setTextCursor(cursor)
+            self._output(f"Replaced theme with preset: {preset['name']}.", ok=True)
+            return
+
         match = re.search(r"(?im)^\s*QUESTION\b", text)
         if match:
             cursor.setPosition(match.start())
-            prefix = "" if text[:match.start()].endswith("\n\n") else "\n"
-            cursor.insertText(prefix + _ECONOMIC_THEME_SNIPPET.rstrip() + "\n\n")
+            prefix = "" if text[: match.start()].endswith("\n\n") else "\n"
+            cursor.insertText(prefix + snippet + "\n\n")
         else:
             cursor.movePosition(QTextCursor.MoveOperation.End)
             prefix = "\n\n" if text.strip() else ""
-            cursor.insertText(prefix + _ECONOMIC_THEME_SNIPPET.rstrip() + "\n")
+            cursor.insertText(prefix + snippet + "\n")
         editor.setTextCursor(cursor)
-        self._output("Inserted economic theme snippet before the first question.", ok=True)
+        self._output(f"Inserted theme: {preset['name']}.", ok=True)
 
     def _show_media_help(self) -> None:
         self._output(
@@ -1678,7 +1936,7 @@ Rules:
 • Local media paths are resolved relative to the saved .qm file folder.
   Example: IMAGE: "images/eiffel.jpg" means <quiz folder>/images/eiffel.jpg.
 • Valid theme properties include background, foreground, accent, font, spacing, radius.
-• Use Edit > Insert Economic Theme for a ready-made business/economics style.
+• Use Edit > Insert Theme… to choose one of three ready-made visual styles with a slider.
 
 """
         docs_file = PROJECT_ROOT / "docs" / "dsl.md"
@@ -1752,7 +2010,7 @@ Correct answers end with *. Comments start with # or //.
     # ── Status bar ─────────────────────────────────────────────────────────
     def _update_title(self) -> None:
         tab = self._cur_tab()
-        title = "QuizMark Studio — Economics Edition"
+        title = "QuizMark Studio"
         if tab and tab.path:
             title += f" — {tab.path}"
             self._status_path.setText(str(tab.path))
