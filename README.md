@@ -12,7 +12,7 @@ python -m quizmark export examples/geography.qm --format web --out web_bundle
 
 ## What QuizMark Does
 
-- Parses `.qm` quiz files using a handwritten ANTLR4-based parser.
+- Parses `.qm` quiz files using a custom handwritten parser.
 - Validates quiz structure, answer correctness, required metadata, and media references.
 - Provides a desktop editor with syntax highlighting, preview, live linting, and export tools.
 - Exports quizzes to:
@@ -38,10 +38,10 @@ QuizMark/
 │   ├── cli/                   # Command-line interface
 │   ├── exporters/             # Exporter implementations for all supported formats
 │   ├── models/                # Quiz data model classes
-│   ├── parser/                # ANTLR parser and error definitions
+│   ├── parser/                # Parser and error definitions
 │   ├── themes/                # Theme parsing and support
 │   └── validators/            # Quiz validation logic
-├── Quiz.g4                    # ANTLR grammar definition
+├── Quiz.g4                    # Grammar definition
 ├── QuizVisitorImpl.py         # Visitor implementation for parse tree conversion
 ├── README.md                  # Project documentation
 ├── requirements.txt           # Python dependencies
@@ -180,7 +180,6 @@ pytest
 
 Primary dependencies are listed in `requirements.txt`:
 
-- `antlr4-python3-runtime==4.13.0`
 - `rich==13.7.1`
 - `pytest==8.2.2`
 - `python-docx==1.1.2`
@@ -203,11 +202,9 @@ python Front/Interface.py
 
 ## Notes
 
-- The parser is built on ANTLR4 and the grammar is defined in `Quiz.g4`.
-- Generated ANTLR files should not be edited manually.
-- Use `antlr4 -Dlanguage=Python3 -visitor Quiz.g4` to regenerate the generated parser files.
+- The parser is a custom handwritten implementation defined by the grammar in `Quiz.g4`.
+- The grammar file should not be edited without updating the parser accordingly.
 
 ## License
 
 This project is intended for educational and development use.
-
