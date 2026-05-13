@@ -108,7 +108,7 @@ class QuizVisitorImpl(QuizVisitor):
             return ctx.STRING_LITERAL().getText().strip('"')
         if ctx.NUMBER():
             raw = ctx.NUMBER().getText()
-            return float(raw) if '.' in raw else raw
+            return float(raw) if '.' in raw else int(raw)
         if ctx.BOOLEAN():
             return ctx.BOOLEAN().getText() == 'true'
         return self.visitText(ctx.text())
