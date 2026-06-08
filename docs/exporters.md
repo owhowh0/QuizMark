@@ -7,6 +7,7 @@ Supported formats:
 - Markdown
 - Plain text
 - Moodle XML
+- Moodle zip package (`.qm` + media for plugin import)
 - DOCX
 - PDF
 - Web package (HTML + CSS + JS + JSON)

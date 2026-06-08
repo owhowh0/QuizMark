@@ -8,6 +8,7 @@ quiz.validate()
 
 html = quiz.render_html()
 json_data = quiz.to_json()
+moodle_zip = quiz.render_moodle_zip()  # bytes, requires Quiz.load() source path
 ```
 
 ## Data access
