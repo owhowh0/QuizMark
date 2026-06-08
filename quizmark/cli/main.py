@@ -30,7 +30,7 @@ def main() -> int:
     export_cmd.add_argument(
         "--format",
         required=True,
-        choices=["html", "json", "markdown", "text", "moodle", "web", "docx", "pdf"],
+        choices=["html", "json", "markdown", "text", "moodle", "moodle-zip", "web", "docx", "pdf"],
     )
     export_cmd.add_argument("--out", help="Output file or directory")
 
@@ -87,9 +87,9 @@ def _handle_export(quiz: Quiz, fmt: str, output: str | None) -> int:
         return 0
 
     content = result
-    if fmt in {"docx", "pdf"}:
+    if fmt in {"docx", "pdf", "moodle-zip"}:
         if not output:
-            raise ParserError("--out is required for docx/pdf exports")
+            raise ParserError("--out is required for docx/pdf/moodle-zip exports")
         Path(output).write_bytes(content)
         console.print(Text(f"Wrote {fmt} to {output}", style="green"))
         return 0
@@ -142,6 +142,7 @@ def _extension_for_format(fmt: str) -> str:
         "markdown": "md",
         "text": "txt",
         "moodle": "xml",
+        "moodle-zip": "zip",
         "docx": "docx",
         "pdf": "pdf",
     }[fmt]

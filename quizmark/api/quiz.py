@@ -10,6 +10,7 @@ from quizmark.exporters import (
     export_json,
     export_markdown,
     export_moodle_xml,
+    export_moodle_zip,
     export_pdf,
     export_text,
     export_web_package,
@@ -59,6 +60,11 @@ class Quiz:
     def render_moodle_xml(self) -> str:
         return export_moodle_xml(self.data)
 
+    def render_moodle_zip(self) -> bytes:
+        if not self.data.source:
+            raise ParserError("Moodle zip export requires a source file path")
+        return export_moodle_zip(self.data, self.data.source)
+
     def render_docx(self) -> bytes:
         return export_docx(self.data)
 
@@ -68,7 +74,7 @@ class Quiz:
     def render_web_package(self) -> dict[str, str]:
         return export_web_package(self.data)
 
-    def export(self, format_name: str) -> str | dict[str, str]:
+    def export(self, format_name: str) -> str | dict[str, str] | bytes:
         format_name = format_name.lower()
         if format_name == "json":
             return self.to_json()
@@ -80,6 +86,8 @@ class Quiz:
             return self.render_text()
         if format_name == "moodle":
             return self.render_moodle_xml()
+        if format_name in {"moodle-zip", "moodle_zip"}:
+            return self.render_moodle_zip()
         if format_name == "docx":
             return self.render_docx()
         if format_name == "pdf":
