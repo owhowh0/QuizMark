@@ -1352,6 +1352,7 @@ class MainWindow(QMainWindow):
         menu_bar = self.menuBar()
 
         file_menu = menu_bar.addMenu("&File")
+        file_menu.setMinimumWidth(280)
         self._add_action(file_menu, "&New", "Ctrl+N", self._new_file)
         self._add_action(file_menu, "&Open…", "Ctrl+O", self._open_file)
         self._add_action(file_menu, "Open &Folder…", "", self._open_folder)
@@ -1363,6 +1364,7 @@ class MainWindow(QMainWindow):
         self._add_action(file_menu, "E&xit", "Ctrl+Q", self.close)
 
         edit_menu = menu_bar.addMenu("&Edit")
+        file_menu.setMinimumWidth(320)
         self._add_action(edit_menu, "&Undo", "Ctrl+Z", lambda: self._cur_editor() and self._cur_editor().undo())
         self._add_action(edit_menu, "&Redo", "Ctrl+Y", lambda: self._cur_editor() and self._cur_editor().redo())
         edit_menu.addSeparator()
@@ -1376,22 +1378,26 @@ class MainWindow(QMainWindow):
         self._add_action(edit_menu, "Insert &Theme…", "Ctrl+Alt+T", self._insert_theme_preset)
 
         run_menu = menu_bar.addMenu("&Run")
+        file_menu.setMinimumWidth(280)
         self._add_action(run_menu, "▶  Validate", "F5", self._validate)
         self._add_action(run_menu, "▶  Lint", "F6", self._lint)
         self._add_action(run_menu, "▶  Preview Text", "F7", self._preview_text_run)
 
         export_menu = menu_bar.addMenu("E&xport")
+        file_menu.setMinimumWidth(280)
         self._add_action(export_menu, "&Export…", "Ctrl+E", self._export)
         export_menu.addSeparator()
         for fmt in ["html", "json", "markdown", "text", "moodle"]:
             export_menu.addAction(f"Export as {fmt.upper()}", lambda checked=False, f=fmt: self._quick_export(f))
 
         view_menu = menu_bar.addMenu("&View")
+        file_menu.setMinimumWidth(280)
         self._add_action(view_menu, "Zoom &In", "Ctrl+=", self._zoom_in)
         self._add_action(view_menu, "Zoom &Out", "Ctrl+-", self._zoom_out)
         self._add_action(view_menu, "Clear Output", "", self._clear_output)
 
         help_menu = menu_bar.addMenu("&Help")
+        file_menu.setMinimumWidth(280)
         self._add_action(help_menu, "QuizMark DSL Reference", "", self._show_dsl_help)
         self._add_action(help_menu, "Image/Media Help", "", self._show_media_help)
         self._add_action(help_menu, "Grammar (BNF view)", "", self._show_grammar)
@@ -1402,6 +1408,7 @@ class MainWindow(QMainWindow):
         action = QAction(label, self)
         if shortcut:
             action.setShortcut(QKeySequence(shortcut))
+            action.setText(f"{label:<40}")
         action.triggered.connect(lambda checked=False, callback=slot: callback())
         menu.addAction(action)
         return action
