@@ -1,5 +1,8 @@
 # Moodle Integration
 
+QuizMark can export quizzes to Moodle-compatible XML format, ready to be imported directly into Moodle's Question Bank.
+
+---
 QuizMark supports two Moodle import workflows.
 
 ## Direct plugin import (recommended for media)
@@ -23,48 +26,42 @@ quizmark export quiz.qm --format moodle-zip --out quiz.zip
 
 The zip contains the `.qm` file plus any local files referenced by `IMAGE:`, `AUDIO:`, `VIDEO:`, and `ATTACH:` lines.
 
-## Moodle XML export
+## Export
 
 ```
 quizmark export quiz.qm --format moodle --out quiz.xml
 ```
 
+## Import
+
 1. Open Moodle
-2. Go to Question bank → Import
-3. Choose **Moodle XML**
-4. Upload `quiz.xml`
+2. Go to Question bank
+3. Choose Import
+4. Select Moodle XML
+5. Upload `quiz.xml`
 
 Images are emitted as `<img src="path">` references in the question/answer text.
 Audio, video, attachments, and math are emitted as HTML tags or inline MathJax syntax.
-
-## Media syntax
-
-```
-IMAGE: "images/mars.png"
-AUDIO: "audio/clip.mp3"
-VIDEO: "video/tour.mp4"
-ATTACH: "files/handout.pdf"
-MATH: "x^2 + y^2 = z^2"
-```
-
-Media lines can appear at the quiz level, within questions, or within answers.
-For the plugin zip import, paths are resolved relative to the `.qm` file inside the archive.
-External `https://` URLs are embedded as-is without file upload.
 
 ## Example XML
 
 ```xml
 <quiz>
-	<question type="multichoice">
-		<name>
-			<text>Which planet is shown?</text>
-		</name>
-		<questiontext format="html">
-			<text><![CDATA[Which planet is shown?<br><img src="images/mars.png">]]></text>
-		</questiontext>
-		<answer fraction="100" format="html">
-			<text><![CDATA[Mars]]></text>
-		</answer>
-	</question>
+    <question type="multichoice">
+        <name>
+            <text>Which planet is shown?</text>
+        </name>
+        <questiontext format="html">
+            <text><![CDATA[Which planet is shown?<br><img src="images/mars.png">]]></text>
+        </questiontext>
+        <answer fraction="100" format="html">
+            <text><![CDATA[Mars]]></text>
+        </answer>
+        <answer fraction="0" format="html">
+            <text><![CDATA[Earth]]></text>
+        </answer>
+    </question>
 </quiz>
 ```
+
+> **Note:** Only multiple-choice questions are currently exported to Moodle XML. The correct answer is exported with `fraction="100"`; all others with `fraction="0"`.
